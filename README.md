@@ -127,14 +127,34 @@ pokecraft-redstone-version-pocket-edition/
 
 ---
 
-## 👨‍💻 Developer & Attribution
+## 👥 Credits & Attribution
 
-* **Creator & Lead Developer**: **ANBU007T**
+### 🌟 Original Game Creator
+* **Original Game**: **Pokémon Redstone** (Minecraft Steve in Pokémon FireRed)
+* **Creator / Developer**: **MozeTech**
+* **X (Twitter)**: [@mozetech](https://x.com/mozetech)
+* *Utmost respect and gratitude to MozeTech for the original creation, vision, gameplay mechanics, and world design of this crossover masterpiece.*
+
+### 🛠️ Emulator & Mobile Architecture (v1.0.1 Update)
+* **Emulator Creator**: **ANBU007T**
 * **GitHub**: [@ANBU007T](https://github.com/ANBU007T)
-* **Role**: PokéCRAFT PE Architecture, Mobile Touch Controller, Fast-Boot Pipeline & Android Distribution
+* **Role**: PokéCRAFT Pocket Edition (PE) Architecture, Mobile Touch Controller, Fast-Boot Pipeline & Android Distribution
+* **v1.0.1 Features Contributed**:
+  * Ergonomic handheld John GBA-style touchscreen virtual gamepad (D-Pad, Bumpers, Combos, Haptics)
+  * High-DPI Kanto Town Map overhaul with sub-pixel accurate Steve GPS tracking & indoor-to-outdoor warp resolution
+  * Complete 51-location Kanto guidebook database
+  * Multi-speed turbo accelerator toggles (1x / 1.75x / 2.5x)
+  * Isolated 6-slot save system (`pokecraft_mobile_slot_1..6`) with live screenshot previews
+  * Zero-Gradle automated build pipeline (AAPT2, D8, apksigner)
+  * Multi-density Android launcher icons & official 3D branding
+
+### 🎮 Trademark Owners
+* **Pokémon**: © Nintendo / Creatures Inc. / GAME FREAK inc. / The Pokémon Company
+* **Minecraft**: © Mojang Studios / Microsoft Corporation
 
 ---
 
 ## ⚖️ Legal Disclaimer
 
-This is a non-commercial, fan-made educational project. Pokémon is a registered trademark of Nintendo, Creatures Inc., and Game Freak. Minecraft is a registered trademark of Mojang AB and Microsoft. All rights belong to their respective owners.
+This is an unofficial, non-commercial fan-made project created for educational and preservation purposes. Website sponsorships and external links are managed independently by the respective developers. Not affiliated with, endorsed by, or sponsored by Nintendo, Game Freak, Creatures, The Pokémon Company, Mojang, or Microsoft. Pokémon and Minecraft are registered trademarks of their respective owners.
+
