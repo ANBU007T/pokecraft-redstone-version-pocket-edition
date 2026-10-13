@@ -133,7 +133,7 @@ pokecraft-redstone-version-pocket-edition/
 * **Original Game**: **Pokémon Redstone** (Minecraft Steve in Pokémon FireRed)
 * **Creator / Developer**: **MozeTech**
 * **X (Twitter)**: [@mozetech](https://x.com/mozetech)
-* *Utmost respect and gratitude to MozeTech for the original creation, vision, gameplay mechanics, and world design of this crossover masterpiece.*
+* Huge respect and gratitude to MozeTech for creating this brilliant and creative fan crossover game.
 
 ### 🛠️ Emulator & Mobile Architecture (v1.0.1 Update)
 * **Emulator Creator**: **ANBU007T**
