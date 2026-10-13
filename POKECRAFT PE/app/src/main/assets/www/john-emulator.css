@@ -1,0 +1,962 @@
+/* ==========================================================================
+   PokéCRAFT Pocket Edition (PE) - John GBA Mobile Chassis & Touch Controls
+   Flawless Landscape & Portrait Handheld Ergonomics
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+  --theme-cyan: #00e5ff;
+  --theme-blue: #0099cc;
+  --theme-bg: #04070b;
+}
+
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  background-color: var(--theme-bg) !important;
+  background-image: 
+    linear-gradient(to right, rgba(0, 140, 220, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 140, 220, 0.08) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, ui-monospace, Menlo, monospace;
+}
+
+/* Master Chassis Container */
+#john-emu-chassis {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  box-sizing: border-box;
+  overflow: hidden;
+  touch-action: none;
+  display: flex;
+}
+
+/* --------------------------------------------------------------------------
+   Top Toolbar (Save, Load, Speed, Menu)
+   -------------------------------------------------------------------------- */
+#john-top-bar {
+  position: fixed;
+  top: max(4px, env(safe-area-inset-top, 4px));
+  left: max(8px, env(safe-area-inset-left, 8px));
+  right: max(8px, env(safe-area-inset-right, 8px));
+  height: 42px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 8px;
+  z-index: 1050;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.john-bar-left,
+.john-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.john-bar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  flex: 1;
+  max-width: 180px;
+  height: 100%;
+}
+
+.john-bar-logo {
+  height: 28px;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 10px rgba(0, 229, 255, 0.45));
+  image-rendering: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+
+.john-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 38px;
+  height: 32px;
+  background: rgba(8, 28, 54, 0.75);
+  border: 1.5px solid rgba(0, 170, 255, 0.55);
+  border-radius: 6px;
+  color: #70d8ff;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  padding: 0;
+  box-shadow: 0 0 8px rgba(0, 140, 220, 0.25);
+  touch-action: manipulation;
+}
+
+.john-tool-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.john-tool-btn:active,
+.john-tool-btn.active {
+  background: rgba(0, 180, 255, 0.45);
+  border-color: #00f0ff;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.85);
+  transform: scale(0.95);
+}
+
+#john-speed-badge {
+  position: absolute;
+  bottom: 1px;
+  right: 3px;
+  font-size: 8px;
+  font-weight: 800;
+  color: #ffd700;
+  text-shadow: 0 0 3px #000;
+  letter-spacing: -0.5px;
+}
+
+/* --------------------------------------------------------------------------
+   Screen Frame & Canvas Placement
+   -------------------------------------------------------------------------- */
+#john-screen-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+#john-screen-frame {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  pointer-events: auto;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#john-screen-frame canvas#game {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* --------------------------------------------------------------------------
+   Virtual Controller Deck (Full Viewport Master Layer)
+   -------------------------------------------------------------------------- */
+#john-controls-deck {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1020;
+  box-sizing: border-box;
+}
+
+.john-deck-left,
+.john-deck-right {
+  position: absolute;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   L and R Shoulder Bumpers
+   -------------------------------------------------------------------------- */
+.john-bumper-slot {
+  display: flex;
+  align-items: center;
+}
+
+.john-bumper-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 34px;
+  border-radius: 17px;
+  border: 1.5px solid rgba(0, 160, 255, 0.55);
+  background: rgba(4, 28, 56, 0.5);
+  color: #cce8ff;
+  font-family: ui-monospace, 'Courier New', monospace;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  touch-action: none;
+  box-sizing: border-box;
+  transition: all 0.08s ease;
+  box-shadow: 0 0 8px rgba(0, 140, 220, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.john-bumper-btn:active,
+.john-bumper-btn.pressed {
+  background: rgba(0, 180, 255, 0.45);
+  border-color: #00e5ff;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.7);
+  transform: scale(0.95);
+}
+
+/* --------------------------------------------------------------------------
+   Authentic D-Pad (8-Directional Cross)
+   -------------------------------------------------------------------------- */
+.john-dpad-container {
+  width: 154px;
+  height: 154px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  user-select: none;
+  position: relative;
+}
+
+.john-dpad-cross {
+  position: relative;
+  width: 144px;
+  height: 144px;
+  background: radial-gradient(circle, rgba(0, 30, 60, 0.6) 0%, rgba(2, 10, 22, 0.85) 70%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 150, 240, 0.45);
+  box-shadow: 0 0 16px rgba(0, 120, 200, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.john-dpad-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #10263f 0%, #06111f 100%);
+  border: 1px solid rgba(0, 160, 255, 0.3);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.john-dpad-btn {
+  position: absolute;
+  background: rgba(8, 28, 54, 0.85);
+  border: 1.5px solid rgba(0, 160, 255, 0.5);
+  color: #70d8ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  transition: all 0.08s ease;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.john-dpad-btn .dpad-arrow {
+  font-size: 15px;
+  pointer-events: none;
+  text-shadow: 0 0 6px rgba(0, 200, 255, 0.8);
+}
+
+.john-dpad-btn.up {
+  top: 4px;
+  left: 50px;
+  width: 44px;
+  height: 48px;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+}
+
+.john-dpad-btn.down {
+  bottom: 4px;
+  left: 50px;
+  width: 44px;
+  height: 48px;
+  border-radius: 0 0 8px 8px;
+  border-top: none;
+}
+
+.john-dpad-btn.left {
+  top: 50px;
+  left: 4px;
+  width: 48px;
+  height: 44px;
+  border-radius: 8px 0 0 8px;
+  border-right: none;
+}
+
+.john-dpad-btn.right {
+  top: 50px;
+  right: 4px;
+  width: 48px;
+  height: 44px;
+  border-radius: 0 8px 8px 0;
+  border-left: none;
+}
+
+.john-dpad-btn:active,
+.john-dpad-btn.pressed {
+  background: rgba(0, 180, 255, 0.5) !important;
+  border-color: #00f0ff !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.9) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Action Buttons (B, A, A+B Combo)
+   -------------------------------------------------------------------------- */
+.john-action-cluster {
+  position: relative;
+  width: 154px;
+  height: 130px;
+  touch-action: none;
+}
+
+.john-action-btn {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(0, 60, 120, 0.9), rgba(2, 16, 36, 0.95));
+  border: 2px solid rgba(0, 170, 255, 0.65);
+  color: #8be0ff;
+  font-family: ui-monospace, 'Courier New', monospace;
+  font-weight: 800;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  transition: all 0.08s ease;
+  box-shadow: 0 0 12px rgba(0, 140, 220, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.john-action-btn.b {
+  left: 6px;
+  bottom: 8px;
+}
+
+.john-action-btn.a {
+  right: 6px;
+  top: 6px;
+}
+
+.john-action-btn:active,
+.john-action-btn.pressed {
+  background: radial-gradient(circle at 35% 35%, rgba(0, 200, 255, 0.85), rgba(0, 120, 220, 0.95)) !important;
+  border-color: #00f0ff !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.95) !important;
+  transform: scale(0.94);
+}
+
+.john-combo-btn {
+  position: absolute;
+  top: 50px;
+  left: 45px;
+  width: 64px;
+  height: 28px;
+  border-radius: 14px;
+  background: rgba(0, 140, 255, 0.25);
+  border: 1px solid rgba(0, 170, 255, 0.55);
+  color: #70d8ff;
+  font-family: ui-monospace, 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  transition: all 0.08s ease;
+}
+
+.john-combo-btn:active,
+.john-combo-btn.pressed {
+  background: rgba(0, 200, 255, 0.55) !important;
+  border-color: #00f0ff !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.85);
+  transform: scale(0.95);
+}
+
+/* --------------------------------------------------------------------------
+   System Buttons (SELECT & START)
+   -------------------------------------------------------------------------- */
+.john-pill-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(0, 160, 255, 0.55);
+  background: rgba(4, 28, 56, 0.55);
+  color: #b0e2ff;
+  font-family: ui-monospace, 'Courier New', monospace;
+  font-weight: 800;
+  font-size: 11.5px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  touch-action: none;
+  transition: all 0.08s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.john-pill-btn:active,
+.john-pill-btn.pressed {
+  background: rgba(0, 180, 255, 0.5);
+  border-color: #00e5ff;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.8);
+  transform: scale(0.95);
+}
+
+/* --------------------------------------------------------------------------
+   Minecraft Quick Action Shortcuts (Jump, Sprint, Inv)
+   -------------------------------------------------------------------------- */
+.john-extra-shortcuts {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.john-extra-btn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 160, 255, 0.5);
+  background: rgba(4, 28, 56, 0.7);
+  color: #92e0ff;
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+  touch-action: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.john-extra-btn.active,
+.john-extra-btn:active,
+.john-extra-btn.pressed {
+  background: #00b4d8 !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 12px rgba(0, 180, 216, 0.85);
+}
+
+/* ==========================================================================
+   PORTRAIT MODE (Default Handheld Layout)
+   ========================================================================== */
+@media (orientation: portrait) {
+  #john-top-bar {
+    background: rgba(3, 10, 20, 0.85);
+    border-bottom: 1px solid rgba(0, 160, 255, 0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  #john-screen-container {
+    top: 40px;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    height: calc(100vw / 1.5);
+    background: #000000;
+    border-bottom: 2px solid #0099cc;
+    box-shadow: 0 4px 18px rgba(0, 153, 204, 0.3);
+  }
+
+  #john-screen-frame {
+    width: 100vw;
+    height: 100%;
+  }
+
+  #john-controls-deck {
+    top: calc(44px + (100vw / 1.5));
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(100vh - 44px - (100vw / 1.5));
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 14px 14px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .john-deck-left {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    height: 100%;
+    width: 48%;
+  }
+
+  .john-deck-left .john-bumper-slot {
+    margin-top: 4px;
+    margin-bottom: auto;
+  }
+
+  .john-deck-left .john-dpad-container {
+    margin: auto 0;
+  }
+
+  .john-deck-left .john-sys-left {
+    margin-top: auto;
+    margin-bottom: 6px;
+    margin-left: 12px;
+  }
+
+  .john-deck-right {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 100%;
+    width: 48%;
+  }
+
+  .john-deck-right .john-bumper-slot {
+    margin-top: 4px;
+  }
+
+  .john-deck-right .john-extra-shortcuts {
+    margin: 6px 0 auto;
+    justify-content: flex-end;
+  }
+
+  .john-deck-right .john-action-cluster {
+    margin: auto 0;
+  }
+
+  .john-deck-right .john-sys-right {
+    margin-top: auto;
+    margin-bottom: 6px;
+    margin-right: 12px;
+  }
+}
+
+/* ==========================================================================
+   LANDSCAPE MODE (Full Viewport Cinema Layout with Corner Thumb Controls)
+   ========================================================================== */
+@media (orientation: landscape) {
+  #john-top-bar {
+    background: transparent;
+    border-bottom: none;
+    height: 44px;
+    padding: 6px max(14px, env(safe-area-inset-right, 14px)) 6px max(14px, env(safe-area-inset-left, 14px));
+  }
+
+  #john-screen-container {
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+  }
+
+  #john-screen-frame {
+    border: none;
+    box-shadow: 0 0 24px rgba(0, 153, 204, 0.35);
+  }
+
+  /* Left Deck in Landscape: Corner Docked */
+  .john-deck-left {
+    left: 20px;
+    bottom: 14px;
+    top: 8px;
+    width: 170px;
+    height: calc(100vh - 22px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .john-deck-left .john-bumper-slot {
+    margin-top: 36px;
+  }
+
+  .john-deck-left .john-dpad-container {
+    margin-top: auto;
+    margin-bottom: 8px;
+  }
+
+  .john-deck-left .john-sys-left {
+    margin-left: 20px;
+    margin-bottom: 2px;
+  }
+
+  /* Right Deck in Landscape: Corner Docked & Fixed Position */
+  .john-deck-right {
+    right: 20px;
+    bottom: 14px;
+    top: 8px;
+    width: 230px;
+    height: calc(100vh - 22px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .john-deck-right .john-bumper-slot {
+    margin-top: 36px;
+  }
+
+  /* Quick action buttons stacked neatly below R bumper */
+  .john-deck-right .john-extra-shortcuts {
+    position: absolute;
+    top: 80px;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .john-deck-right .john-action-cluster {
+    margin-top: auto;
+    margin-bottom: 8px;
+  }
+
+  .john-deck-right .john-sys-right {
+    margin-right: 20px;
+    margin-bottom: 2px;
+  }
+}
+
+/* ==========================================================================
+   Mobile PE 6-Slot Save Sheet / Dropdown Modal
+   ========================================================================== */
+.save-dropdown-floating {
+  display: none;
+  position: fixed;
+  top: 46px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95vw;
+  max-width: 480px;
+  max-height: calc(100vh - 60px);
+  background: rgba(10, 18, 30, 0.96);
+  border: 1.5px solid rgba(0, 180, 255, 0.45);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 150, 255, 0.3);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 2000;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.save-dropdown-floating.show {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.save-dropdown-header-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.save-dropdown-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.save-dropdown-main-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #70d8ff;
+  letter-spacing: 0.04em;
+}
+
+.save-dropdown-close-x {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+
+.save-dropdown-close-x:active {
+  color: #ffffff;
+}
+
+.save-profile-notice-text {
+  font-size: 11px;
+  color: #38bdf8;
+  font-weight: 500;
+}
+
+.emu-dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+}
+
+.save-dropdown-quick-bar {
+  display: flex;
+  gap: 10px;
+}
+
+.save-quick-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 160, 255, 0.4);
+  background: rgba(15, 23, 42, 0.8);
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.save-quick-btn:active {
+  transform: scale(0.97);
+}
+
+.save-quick-btn-primary {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.emu-dropdown-header {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  margin: 4px 0 6px;
+}
+
+.save-menu-slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 52vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 2px;
+}
+
+/* Individual Slot Row Card */
+.save-menu-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  border-radius: 8px;
+  transition: all 0.12s ease;
+  touch-action: manipulation;
+}
+
+.save-menu-slot-row.active {
+  border-color: #00e5ff;
+  background: rgba(8, 47, 73, 0.7);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+.save-slot-thumb-container {
+  position: relative;
+  width: 80px;
+  height: 53px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(0, 160, 255, 0.3);
+}
+
+.save-slot-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.save-slot-thumb-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.save-slot-badge-num {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #38bdf8;
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.save-slot-details-container {
+  flex: 1;
+  min-width: 0;
+}
+
+.save-slot-row-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.save-slot-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.save-slot-current-badge {
+  background: #0284c7;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.save-slot-row-date {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.save-slot-row-stats {
+  display: flex;
+  gap: 8px;
+  font-size: 9.5px;
+  color: #cbd5e1;
+  margin-top: 3px;
+}
+
+.save-slot-row-empty-hint {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.save-slot-actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btn-slot-quick-save,
+.btn-slot-quick-load {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(0, 160, 255, 0.4);
+  touch-action: manipulation;
+}
+
+.btn-slot-quick-save {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.btn-slot-quick-load {
+  background: rgba(30, 41, 59, 0.85);
+  color: #70d8ff;
+}
+
+.save-dropdown-footer-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.save-dropdown-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Toast Notification Styling
+   ========================================================================== */
+#emulator-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1.5px solid #00e5ff;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 229, 255, 0.4);
+  z-index: 3000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#emulator-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}

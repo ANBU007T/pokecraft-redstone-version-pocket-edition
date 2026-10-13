@@ -1,0 +1,13 @@
+# Auto-detect text files and normalize line endings to LF on commit
+* text=auto
+# Git LFS tracking for compiled APK
+*.apk filter=lfs diff=lfs merge=lfs -text
+# Binary formats
+*.png binary
+*.jpg binary
+*.ico binary
+*.bin binary
+*.ogg binary
+*.wav binary
+*.jar binary
+*.keystore binary

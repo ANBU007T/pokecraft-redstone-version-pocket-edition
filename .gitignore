@@ -1,0 +1,24 @@
+# ==============================================================================
+# PokéCRAFT Pocket Edition (PE) — Git Ignore
+# ==============================================================================
+
+# Build artifacts
+**/build_temp/
+build_temp/
+*.idsig
+*.tmp
+*.bak
+*.log
+
+# Android Studio & IntelliJ IDE
+.idea/
+**/.idea/
+*.iml
+**/*.iml
+
+# Operating System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
