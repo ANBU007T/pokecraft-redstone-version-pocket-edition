@@ -478,10 +478,10 @@ html, body {
    ========================================================================== */
 @media (orientation: portrait) {
   #john-top-bar {
-    background: rgba(3, 10, 20, 0.85);
-    border-bottom: 1px solid rgba(0, 160, 255, 0.3);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: transparent;
+    border-bottom: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   #john-screen-container {

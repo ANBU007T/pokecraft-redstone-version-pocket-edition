@@ -357,7 +357,7 @@ export function sprites(avatars, P, cam, list) {
   for (const av of avatars) {
     if (!av.visibleNow || !sameView(av, P)) { av.puff = false; continue; }
     if (av.puff) { av.puff = false; poofAt(av); }
-    const look = av.gear();
+    const look = av.gear() || SK.withGear(SK.lookNow('steve'), null, null);
     if (!look) continue;
     const alpha = av.away ? 0.5 : 1;
     if (av.riding) {

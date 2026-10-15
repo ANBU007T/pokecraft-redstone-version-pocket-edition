@@ -200,18 +200,42 @@ function wrapMc(text, maxW) {
 
 // ------------------------------------------------------------ page-level overlays
 const CSS = `
-.coop-ov { position: fixed; z-index: 20; font: 16px ui-monospace, Menlo, monospace; color: #e6e6e6; }
-.coop-ov form { background: #1d1d1d; border: 1px solid #3a3a3a; border-radius: 8px; padding: 14px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
-.coop-ov .t { font-size: 13px; letter-spacing: .06em; color: #c4c4c4; margin-bottom: 10px; }
-.coop-ov label { display: block; font-size: 12px; color: #8c8c8c; margin: 8px 0 4px; }
-.coop-ov input, .coop-ov select { box-sizing: border-box; width: 100%; padding: 7px 9px; border: 1px solid #3a3a3a; border-radius: 6px; background: #262626; color: #e6e6e6; font: 16px ui-monospace, Menlo, monospace; }
-.coop-ov input:focus, .coop-ov select:focus { outline: none; border-color: #7a7a7a; }
-.coop-ov #coop-code { text-transform: uppercase; letter-spacing: .3em; }
-.coop-ov .err { min-height: 16px; margin-top: 8px; font-size: 12px; color: #ff8a80; }
+.coop-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.coop-ov { position: fixed; z-index: 9999; font: 15px ui-monospace, Menlo, monospace; color: #e6e6e6; }
+.coop-modal-backdrop .coop-ov { position: relative; z-index: 10000; max-width: 320px; width: 100%; margin: auto; }
+.coop-ov form { background: #1d1d1d; border: 1px solid #3a3a3a; border-radius: 8px; padding: 12px 14px; box-shadow: 0 6px 24px rgba(0,0,0,.6); max-height: 94vh; overflow-y: auto; box-sizing: border-box; }
+.coop-ov .t { font-size: 13px; font-weight: bold; letter-spacing: .06em; color: #c4c4c4; margin-bottom: 8px; text-align: center; }
+.coop-ov label { display: block; font-size: 11px; color: #8c8c8c; margin: 6px 0 2px; }
+.coop-ov input, .coop-ov select { box-sizing: border-box; width: 100%; padding: 6px 8px; border: 1px solid #3a3a3a; border-radius: 6px; background: #262626; color: #e6e6e6; font: 14px ui-monospace, Menlo, monospace; }
+.coop-ov input:focus, .coop-ov select:focus { outline: none; border-color: #58a6ff; }
+.coop-ov #coop-code { text-transform: uppercase; letter-spacing: .3em; text-align: center; font-weight: bold; }
+.coop-ov .err { min-height: 14px; margin-top: 6px; font-size: 11px; color: #ff8a80; text-align: center; }
 .coop-ov .b { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
-.coop-ov button { padding: 7px 14px; border: 0; border-radius: 6px; background: #3a3a3a; color: #e6e6e6; font: 600 13px ui-monospace, Menlo, monospace; cursor: pointer; }
+.coop-ov button { padding: 6px 14px; border: 0; border-radius: 6px; background: #3a3a3a; color: #e6e6e6; font: 600 13px ui-monospace, Menlo, monospace; cursor: pointer; }
 .coop-ov button[type=submit] { background: #5a3a3a; }
 .coop-ov button:disabled { opacity: .6; cursor: default; }
+@media (max-height: 480px) {
+  .coop-modal-backdrop { padding: 4px; }
+  .coop-ov form { padding: 6px 10px; max-height: 96vh; }
+  .coop-ov .t { font-size: 11px; margin-bottom: 4px; }
+  .coop-ov label { font-size: 10px; margin: 3px 0 1px; }
+  .coop-ov input, .coop-ov select { padding: 4px 6px; font-size: 12px; }
+  .coop-ov .err { min-height: 12px; margin-top: 3px; font-size: 10px; }
+  .coop-ov .b { margin-top: 5px; }
+  .coop-ov button { padding: 4px 10px; font-size: 11px; }
+}
 #coop-chat form { padding: 4px; border-radius: 4px; background: rgba(0,0,0,.6); border: 0; box-shadow: none; }
 #coop-chat input { border: 0; background: transparent; padding: 4px 6px; }
 #coop-chatbtn { position: absolute; right: 18px; bottom: 86px; pointer-events: auto; width: 56px; height: 30px; border: 0; border-radius: 8px; background: #3a3a3a; color: #ddd; font: 700 11px ui-monospace, monospace; -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; }
@@ -233,50 +257,118 @@ function escHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;'
 // JOIN: the room code, a name (blank: the skin's name) and, if wanted, a skin
 export function openJoin({ code = '', from = null } = {}) {
   style();
+  closeOverlay('coop-join-backdrop');
   closeOverlay('coop-join');
-  const r = canvasRect();
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'coop-join-backdrop';
+  backdrop.className = 'coop-modal-backdrop';
+
   const div = document.createElement('div');
-  div.id = 'coop-join'; div.className = 'coop-ov';
-  const w = Math.min(320, innerWidth - 24);
-  div.style.left = Math.round(Math.max(12, r.left + r.width / 2 - w / 2)) + 'px';
-  div.style.top = Math.round(Math.max(12, r.top + Math.min(r.height * 0.12, 60))) + 'px';
-  div.style.width = w + 'px';
+  div.id = 'coop-join';
+  div.className = 'coop-ov';
+
   let saved = '';
   try { saved = localStorage.getItem('rs.coop.name') || ''; } catch (e) { /* none */ }
+  let savedServer = '';
+  try { savedServer = localStorage.getItem('rs.coop.server') || ''; } catch (e) { /* none */ }
   const label = (s) => s[0].toUpperCase() + s.slice(1);
+
   div.innerHTML = `<form autocomplete="off" novalidate>
     <div class="t">JOIN A FRIEND'S WORLD</div>
     <label for="coop-code">Enter the room code.</label>
     <input id="coop-code" name="code" maxlength="5" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="next" value="${escHtml(code)}">
     <label for="coop-name">What's your name?</label>
-    <input id="coop-name" name="name" maxlength="10" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="ALEX" value="${escHtml(saved)}">
+    <input id="coop-name" name="name" maxlength="10" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="ALEX" value="${escHtml(saved)}">
     <label for="coop-skin">Look</label>
     <select id="coop-skin" name="skin"><option value="">Any (next free)</option>${SKINS.slice(1).map((s) => `<option value="${s}">${label(s)}</option>`).join('')}</select>
+    <label for="coop-server">Host IP / Server (blank = local relay)</label>
+    <input id="coop-server" name="server" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="192.168.x.x or blank" value="${escHtml(savedServer)}">
     <div class="err" role="status"></div>
     <div class="b"><button type="button" class="cancel">CANCEL</button><button type="submit">JOIN</button></div>
   </form>`;
-  document.body.appendChild(div);
-  const form = div.querySelector('form'), codeIn = form.code, nameIn = form.name, skinIn = form.skin, err = div.querySelector('.err');
+
+  backdrop.appendChild(div);
+  document.body.appendChild(backdrop);
+
+  const form = div.querySelector('form'), codeIn = form.code, nameIn = form.name, skinIn = form.skin, serverIn = form.server, err = div.querySelector('.err');
+
+  // Handle mobile visualViewport resize when virtual keyboard opens
+  const updateVv = () => {
+    if (window.visualViewport) {
+      const vv = window.visualViewport;
+      backdrop.style.height = vv.height + 'px';
+      backdrop.style.top = vv.offsetTop + 'px';
+      backdrop.style.left = vv.offsetLeft + 'px';
+      backdrop.style.width = vv.width + 'px';
+    }
+  };
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateVv);
+    window.visualViewport.addEventListener('scroll', updateVv);
+    updateVv();
+  }
+
   const done = () => {
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', updateVv);
+      window.visualViewport.removeEventListener('scroll', updateVv);
+    }
+    closeOverlay('coop-join-backdrop');
     closeOverlay('coop-join');
-    document.removeEventListener('pointerdown', outside, true);
     if (ui.mode === 'overlay') back(from || 'play');
   };
-  const outside = (e) => { if (!div.contains(e.target)) done(); };
-  setTimeout(() => document.addEventListener('pointerdown', outside, true), 0);
+
+  // Only dismiss if the user taps directly on the dimmed backdrop (never when typing or tapping inputs)
+  backdrop.addEventListener('pointerdown', (e) => {
+    if (e.target === backdrop) done();
+  });
+
   skinIn.addEventListener('change', () => { nameIn.placeholder = skinIn.value ? skinIn.value.toUpperCase() : 'ALEX'; });
   codeIn.addEventListener('input', () => { const v = codeIn.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); if (v !== codeIn.value) codeIn.value = v; });
   div.querySelector('.cancel').addEventListener('click', done);
   form.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); done(); } });
   codeIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); nameIn.focus(); } });
+  nameIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); skinIn.focus(); } });
+
+  // Ensure active input remains visible above keyboard on mobile
+  [codeIn, nameIn, skinIn, serverIn].forEach((el) => {
+    if (el) {
+      el.addEventListener('focus', () => {
+        setTimeout(() => {
+          updateVv();
+          el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 150);
+      });
+    }
+  });
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const bad = S.requestJoin(codeIn.value, nameIn.value, skinIn.value);
+    let customBase = null;
+    const rawServer = (serverIn ? serverIn.value : '').trim();
+    if (rawServer) {
+      let s = rawServer;
+      if (!/^wss?:\/\//i.test(s)) {
+        if (!/:[0-9]+$/.test(s)) s += ':5901';
+        s = 'ws://' + s;
+      }
+      customBase = s;
+      try { localStorage.setItem('rs.coop.server', rawServer); } catch (e) {}
+    }
+    let chosenSkin = skinIn.value;
+    if (!chosenSkin && nameIn.value) {
+      const lower = nameIn.value.toLowerCase().trim();
+      if (SKINS.includes(lower)) chosenSkin = lower;
+    }
+    try { if (nameIn.value.trim()) localStorage.setItem('rs.coop.name', nameIn.value.trim()); } catch (e) {}
+    const bad = S.requestJoin(codeIn.value, nameIn.value, chosenSkin, customBase);
     if (bad) { err.textContent = bad === TEXT.badname ? 'Names are 1 to 10 letters (A to Z) or numbers.' : 'Enter the 5-letter room code.'; return; }
     err.textContent = 'Joining...';
     for (const b of form.querySelectorAll('button')) b.disabled = true;
   });
-  (code ? nameIn : codeIn).focus();
+
+  if (code) nameIn.focus();
 }
 
 // chat: T (or CHAT on the phone pad) opens a line at the bottom left; Enter sends, Escape closes

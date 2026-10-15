@@ -300,76 +300,117 @@
   function refitCanvas() {
     const canvas = document.getElementById('game');
     const frame = document.getElementById('john-screen-frame');
+    const container = document.getElementById('john-screen-container');
+    const deck = document.getElementById('john-controls-deck');
     if (!canvas || !frame) return;
 
     if (canvas.parentNode !== frame) {
       frame.appendChild(canvas);
     }
 
-    const scaleMode = localStorage.getItem('pokecraft-scale-mode') || 'fit';
+    const scaleMode = (() => {
+      try { return localStorage.getItem('pokecraft-scale-mode') || 'fit'; } catch(e) { return 'fit'; }
+    })();
     const isPortrait = window.innerHeight > window.innerWidth;
+    const availW = window.innerWidth;
+    const availH = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
 
-    const GW = 480; // native GBA width
-    const GH = 320; // native GBA height
+    const GW = 480; // native GBA width (2x 240)
+    const GH = 320; // native GBA height (2x 160)
+
+    document.body.dataset.scaleMode = scaleMode;
+    document.body.dataset.orientation = isPortrait ? 'portrait' : 'landscape';
 
     if (isPortrait) {
-      const availW = window.innerWidth;
-      const availH = Math.round(availW / 1.5);
+      const topBar = document.getElementById('john-top-bar');
+      const topH = (topBar && topBar.offsetHeight) ? topBar.offsetHeight : 40;
+      let screenH, cw, ch;
 
       if (scaleMode === 'stretch') {
-        const stretchH = Math.round(window.innerHeight * 0.44);
-        canvas.style.width = availW + 'px';
-        canvas.style.height = stretchH + 'px';
-        frame.style.width = availW + 'px';
-        frame.style.height = stretchH + 'px';
+        screenH = Math.round(availH * 0.44);
+        cw = availW;
+        ch = screenH;
       } else if (scaleMode === 'crisp') {
-        const factor = Math.max(1, Math.floor(Math.min(availW / GW, availH / GH)));
-        canvas.style.width = (GW * factor) + 'px';
-        canvas.style.height = (GH * factor) + 'px';
-        frame.style.width = availW + 'px';
-        frame.style.height = availH + 'px';
+        screenH = Math.round(availW / 1.5);
+        const physW = availW * dpr;
+        const physH = screenH * dpr;
+        const factor = Math.max(1, Math.floor(Math.min(physW / GW, physH / GH)));
+        cw = (GW * factor) / dpr;
+        ch = (GH * factor) / dpr;
       } else {
         // 'fit' default (3:2)
-        canvas.style.width = availW + 'px';
-        canvas.style.height = availH + 'px';
-        frame.style.width = availW + 'px';
-        frame.style.height = availH + 'px';
+        screenH = Math.round(availW / 1.5);
+        cw = availW;
+        ch = screenH;
+      }
+
+      canvas.style.width = Math.round(cw) + 'px';
+      canvas.style.height = Math.round(ch) + 'px';
+      frame.style.width = availW + 'px';
+      frame.style.height = screenH + 'px';
+
+      if (container) {
+        container.style.top = topH + 'px';
+        container.style.left = '0px';
+        container.style.width = availW + 'px';
+        container.style.height = screenH + 'px';
+      }
+
+      if (deck) {
+        const deckTop = topH + screenH;
+        deck.style.top = deckTop + 'px';
+        deck.style.left = '0px';
+        deck.style.width = availW + 'px';
+        deck.style.height = Math.max(0, availH - deckTop) + 'px';
       }
     } else {
       // Landscape View
-      const availW = window.innerWidth;
-      const availH = window.innerHeight;
+      let cw, ch;
 
       if (scaleMode === 'stretch') {
-        canvas.style.width = availW + 'px';
-        canvas.style.height = availH + 'px';
-        frame.style.width = availW + 'px';
-        frame.style.height = availH + 'px';
+        cw = availW;
+        ch = availH;
       } else if (scaleMode === 'crisp') {
-        const factor = Math.max(1, Math.floor(Math.min(availW / GW, availH / GH)));
-        const w = GW * factor;
-        const h = GH * factor;
-        canvas.style.width = w + 'px';
-        canvas.style.height = h + 'px';
-        frame.style.width = w + 'px';
-        frame.style.height = h + 'px';
+        const physW = availW * dpr;
+        const physH = availH * dpr;
+        const factor = Math.max(1, Math.floor(Math.min(physW / GW, physH / GH)));
+        cw = (GW * factor) / dpr;
+        ch = (GH * factor) / dpr;
       } else {
-        // 'fit' default (Cinema height 100vh with 3:2 aspect)
-        const h = availH;
-        const w = Math.round(availH * 1.5);
-        canvas.style.width = w + 'px';
-        canvas.style.height = h + 'px';
-        frame.style.width = w + 'px';
-        frame.style.height = h + 'px';
+        // 'fit' default (Cinema height / width maintaining 3:2 aspect)
+        const scale = Math.min(availW / GW, availH / GH);
+        cw = Math.round(GW * scale);
+        ch = Math.round(GH * scale);
+      }
+
+      canvas.style.width = Math.round(cw) + 'px';
+      canvas.style.height = Math.round(ch) + 'px';
+      frame.style.width = Math.round(cw) + 'px';
+      frame.style.height = Math.round(ch) + 'px';
+
+      if (container) {
+        container.style.top = '0px';
+        container.style.left = '0px';
+        container.style.width = availW + 'px';
+        container.style.height = availH + 'px';
+      }
+
+      if (deck) {
+        deck.style.top = '0px';
+        deck.style.left = '0px';
+        deck.style.width = availW + 'px';
+        deck.style.height = availH + 'px';
       }
     }
   }
 
   // Hook global display functions
+  window.__johnRefit = refitCanvas;
   window.__refitGame = refitCanvas;
 
   window.__setGameScaleMode = (mode) => {
-    localStorage.setItem('pokecraft-scale-mode', mode);
+    try { localStorage.setItem('pokecraft-scale-mode', mode); } catch(e){}
     refitCanvas();
     const modeName = mode === 'crisp' ? 'Pixel Crisp (Integer)' : mode === 'stretch' ? 'Stretch Fill' : 'Fit 3:2 Aspect';
     toast(`🖥️ Screen: ${modeName}`);

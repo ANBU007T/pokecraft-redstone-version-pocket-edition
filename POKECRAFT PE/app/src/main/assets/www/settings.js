@@ -77,8 +77,12 @@
       scaleBtns.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       const mode = btn.dataset.scale;
-      if (window.__setGameScaleMode) {
+      try { localStorage.setItem('pokecraft-scale-mode', mode); } catch(e){}
+      if (typeof window.__setGameScaleMode === 'function') {
         window.__setGameScaleMode(mode);
+      }
+      if (typeof window.__refitGame === 'function') {
+        window.__refitGame();
       }
     });
   });

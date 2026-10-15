@@ -4,8 +4,8 @@ import shutil
 import subprocess
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-VERSION_NAME = "1.0.1"
-VERSION_CODE = 4
+VERSION_NAME = "1.0.2"
+VERSION_CODE = 5
 
 if os.path.exists(os.path.join(script_dir, 'POKECRAFT PE')):
     mobile_dir = script_dir
@@ -61,13 +61,27 @@ for fl in files:
 
 for sub in ['src', 'assets']:
     src_sub = os.path.join(mobile_dir, sub)
-    if not os.path.exists(src_sub) and os.path.exists(os.path.join(workspace, sub)):
-        src_sub = os.path.join(workspace, sub)
+    # Only use src_sub if it has actual game data (e.g., sprites/world or main.js), otherwise check workspace
+    is_valid_game_data = False
+    if os.path.exists(src_sub):
+        if sub == 'assets' and (os.path.exists(os.path.join(src_sub, 'sprites')) or os.path.exists(os.path.join(src_sub, 'world'))):
+            is_valid_game_data = True
+        elif sub == 'src' and os.path.exists(os.path.join(src_sub, 'main.js')):
+            is_valid_game_data = True
+
+    if not is_valid_game_data and os.path.exists(os.path.join(workspace, sub)):
+        ws_sub = os.path.join(workspace, sub)
+        if sub == 'assets' and (os.path.exists(os.path.join(ws_sub, 'sprites')) or os.path.exists(os.path.join(ws_sub, 'world'))):
+            src_sub = ws_sub
+            is_valid_game_data = True
+        elif sub == 'src' and os.path.exists(os.path.join(ws_sub, 'main.js')):
+            src_sub = ws_sub
+            is_valid_game_data = True
+
     dst_sub = os.path.join(assets_dir, sub)
-    if os.path.exists(src_sub) and os.path.abspath(src_sub) != os.path.abspath(dst_sub):
-        if os.path.exists(dst_sub):
-            shutil.rmtree(dst_sub)
-        shutil.copytree(src_sub, dst_sub)
+    if is_valid_game_data and os.path.abspath(src_sub) != os.path.abspath(dst_sub):
+        shutil.copytree(src_sub, dst_sub, dirs_exist_ok=True)
+
 
 print('=== 3. Setting up app icon & mipmap densities ===')
 icon_src = os.path.join(mobile_dir, 'PokeCraft_icon_512.png')
@@ -590,7 +604,7 @@ backup_zip_path = os.path.join(backup_dir, f'PokeCraft_Pocket_Edition_v{VERSION_
 try:
     with zipfile.ZipFile(backup_zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as bzf:
         for root, dirs, fls in os.walk(mobile_dir):
-            if 'build_temp' in root or '.git' in root:
+            if 'build_temp' in root or '.git' in root or '.idea' in root:
                 continue
             for f in fls:
                 fpath = os.path.join(root, f)

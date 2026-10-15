@@ -44,6 +44,10 @@ let gameScaleMode = (() => {
 })();
 
 function fit() {
+  if (typeof window.__johnRefit === 'function') {
+    window.__johnRefit();
+    return;
+  }
   const mode = gameScaleMode;
   const isFull = document.body.classList.contains('game-fullscreen') || !!document.fullscreenElement || (window.__pywebviewFullscreen === true);
 
@@ -79,14 +83,35 @@ function fit() {
   }
 }
 
+const prevSetScale = window.__setGameScaleMode;
 window.__setGameScaleMode = (m) => {
   gameScaleMode = m;
   try { localStorage.setItem('pokecraft-scale-mode', m); } catch(e){}
-  fit();
+  if (typeof window.__johnRefit === 'function') {
+    window.__johnRefit();
+  } else if (typeof prevSetScale === 'function' && prevSetScale !== window.__setGameScaleMode) {
+    try { prevSetScale(m); } catch(e){}
+  } else {
+    fit();
+  }
 };
-window.__getGameScaleMode = () => gameScaleMode;
-window.__refitGame = fit;
-window.addEventListener('resize', fit);
+window.__getGameScaleMode = () => {
+  try { return localStorage.getItem('pokecraft-scale-mode') || gameScaleMode; } catch(e){ return gameScaleMode; }
+};
+window.__refitGame = () => {
+  if (typeof window.__johnRefit === 'function') {
+    window.__johnRefit();
+  } else {
+    fit();
+  }
+};
+window.addEventListener('resize', () => {
+  if (typeof window.__johnRefit === 'function') {
+    window.__johnRefit();
+  } else {
+    fit();
+  }
+});
 fit();
 ctx.fillStyle = '#000'; ctx.fillRect(0, 0, HW, HH);
 const params = new URLSearchParams(location.search);

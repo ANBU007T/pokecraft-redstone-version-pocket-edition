@@ -48,9 +48,22 @@ function file(f) {
     if (f === 'held_uv.png') return Promise.resolve(steve().heldUv);
     const m = /^armor_(\w+?)_(\w+)\.png$/.exec(f);
     if (m) return Promise.resolve(steve().armorImgs[`${m[1]}_${m[2]}`]);
-    return Promise.reject(new Error('unknown skin file ' + f));
+    return Promise.resolve(steve().img);
   }
-  if (!files.has(f)) files.set(f, loadImage(MC + f));
+  if (!files.has(f)) {
+    files.set(
+      f,
+      loadImage(MC + f).catch((err) => {
+        // Fallback to Steve equivalent assets if custom skin piece is missing
+        if (f.endsWith('back.png')) return steve().back;
+        if (f.endsWith('portrait.png')) return steve().portrait;
+        if (f.includes('held_uv')) return steve().heldUv;
+        const m = /^skins\/armor_(\w+?)_(\w+)/.exec(f);
+        if (m && steve().armorImgs[`${m[1]}_${m[2]}`]) return steve().armorImgs[`${m[1]}_${m[2]}`];
+        return steve().img;
+      })
+    );
+  }
   return files.get(f);
 }
 
@@ -61,27 +74,39 @@ export function loadSkin(name) {
   if (looks.has(name)) return looks.get(name);
   const e = A.items.skins.list[name];
   const p = (async () => {
-    const armorKeys = Object.keys(e.armor);
-    const [img, heldUv, back, portrait, ...armor] = await Promise.all([file(e.sheet), file(e.held), file(e.back), file(e.portrait), ...armorKeys.map((k) => file(e.armor[k]))]);
-    const armorImgs = {};
-    armorKeys.forEach((k, i) => { armorImgs[k] = armor[i]; });
-    // every look carries its hand anchors: a guest's own A.items.steve.hands are its skin's, not Steve's
-    return { key: name, name, model: e.model, img, heldUv, armorImgs, hands: e.hands || steve().hands, back, backHands: e.backHands, portrait };
+    try {
+      const armorKeys = Object.keys(e.armor || {});
+      const [img, heldUv, back, portrait, ...armor] = await Promise.all([
+        file(e.sheet), file(e.held), file(e.back), file(e.portrait),
+        ...armorKeys.map((k) => file(e.armor[k]))
+      ]);
+      const armorImgs = {};
+      armorKeys.forEach((k, i) => { armorImgs[k] = armor[i]; });
+      // every look carries its hand anchors: a guest's own A.items.steve.hands are its skin's, not Steve's
+      return { key: name, name, model: e.model, img: img || steve().img, heldUv: heldUv || steve().heldUv, armorImgs, hands: e.hands || steve().hands, back: back || steve().back, backHands: e.backHands || steve().backHands, portrait: portrait || steve().portrait };
+    } catch (err) {
+      return steve();
+    }
   })();
-  p.catch(() => looks.delete(name));    // a failed load can be tried again
   looks.set(name, p);
   return p;
 }
-// the look already loaded, or null (drawing never waits)
+// the look already loaded, or fallback to steve (drawing never waits and never drops avatars)
 const ready = new Map();
 export function lookNow(name) {
   if (name === 'steve' || !A.items.skins || !A.items.skins.list[name]) return steve();
   if (ready.has(name)) return ready.get(name);
-  loadSkin(name).then((l) => ready.set(name, l), () => {});
-  return null;
+  loadSkin(name).then(
+    (l) => ready.set(name, l || steve()),
+    () => ready.set(name, steve())
+  );
+  return steve(); // Immediate fallback so character is ALWAYS visible
 }
 // a look with a player's gear, for PL.drawSteve
-export const withGear = (look, held, armor) => (look ? { ...look, held: held || null, armor: armor || [] } : null);
+export const withGear = (look, held, armor) => {
+  const l = look || steve();
+  return { ...l, held: held || null, armor: armor || [] };
+};
 
 // ---------------------------------------------------------------- a guest's own Steve
 // The guest's own character is drawn by the single-player code from A.mc, so its skin replaces Steve's
