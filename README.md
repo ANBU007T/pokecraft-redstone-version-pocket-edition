@@ -165,6 +165,14 @@ pokecraft-redstone-version-pocket-edition/
   * Zero-Gradle automated build pipeline (AAPT2, D8, apksigner)
   * Multi-density Android launcher icons & official 3D branding
 
+### 🤖 Contributor & Engineering Assistant
+* **Contributor**: **Antigravity 3.8 Flash (High)**
+* **Role**: Mobile Systems Engineering & Architecture Assistant
+* **Contributions**:
+  * Adaptive DPR-aware Integer Scaling engine (Pixel Crisp), 3:2 Aspect Ratio (Fit), and Viewport Fill (Stretch)
+  * Complete 9-character Minecraft skin asset integration and crash-proof synchronous fallback pipeline
+  * Zero-Gradle automated build toolchain (AAPT2, D8, apksigner) & version release automation
+
 ### 🎮 Trademark Owners
 * **Pokémon**: © Nintendo / Creatures Inc. / GAME FREAK inc. / The Pokémon Company
 * **Minecraft**: © Mojang Studios / Microsoft Corporation
